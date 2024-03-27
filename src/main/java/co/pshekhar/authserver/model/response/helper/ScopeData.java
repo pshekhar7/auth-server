@@ -1,4 +1,4 @@
-package co.pshekhar.authserver.model.response;
+package co.pshekhar.authserver.model.response.helper;
 
 import lombok.Getter;
 import lombok.ToString;

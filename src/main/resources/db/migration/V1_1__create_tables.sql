@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS  credentials (
                              last_rotated_on DATETIME,
                              scope_id VARCHAR(255),
                              status VARCHAR(255),
-                             contextData JSON,
+                             context_data JSON,
                              created_on DATETIME,
                              last_updated_on DATETIME
 );

@@ -8,6 +8,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public class Credentials implements Persistable<String> {
 
     private String ClientSecret;
 
-    private ZonedDateTime expiry;
+    private LocalDateTime expiry;
 
     private ZonedDateTime lastRotatedOn;
 
@@ -27,10 +28,10 @@ public class Credentials implements Persistable<String> {
     private CredStatus status;
 
     @CreatedDate
-    private ZonedDateTime createdOn;
+    private LocalDateTime createdOn;
 
     @LastModifiedDate
-    private ZonedDateTime lastUpdatedOn;
+    private LocalDateTime lastUpdatedOn;
 
     @Transient
     private boolean isNewEntry = false;

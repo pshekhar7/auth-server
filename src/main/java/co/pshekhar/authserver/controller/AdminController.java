@@ -1,6 +1,8 @@
 package co.pshekhar.authserver.controller;
 
+import co.pshekhar.authserver.model.request.CredentialRequest;
 import co.pshekhar.authserver.model.request.ScopeRequest;
+import co.pshekhar.authserver.model.response.CredentialsResponse;
 import co.pshekhar.authserver.model.response.ScopeResponse;
 import co.pshekhar.authserver.model.response.Status;
 import co.pshekhar.authserver.service.AdminService;
@@ -42,10 +44,10 @@ public class AdminController {
     }
 
     @PostMapping(value = "/cred/issue", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    Mono<ResponseEntity<ScopeResponse>> issueCredentials(@Valid @RequestBody ScopeRequest request) {
-        return adminService.getScope(request)
+    Mono<ResponseEntity<CredentialsResponse>> issueCredentials(@Valid @RequestBody CredentialRequest request) {
+        return adminService.issueCredentials(request)
                 .map(response -> {
-                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
                     return ResponseEntity.status(httpStatus).body(response);
                 });
     }
