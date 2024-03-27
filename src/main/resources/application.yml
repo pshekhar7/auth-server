@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: auth-server
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/auth_db
+    username: groot
+    password: iamgroot
+    pool:
+      enabled: true
+  flyway:
+    url: jdbc:mysql://localhost:3306/auth_db
