@@ -65,7 +65,7 @@ public class AdminService {
     private Mono<CredentialsResponse> checkAndSaveNewCredentials(CredentialRequest request) {
         return scopeRepository.findByTypeAndIdentifier(ScopeType.valueOf(request.getScope()), request.getScopeId())
                 .log()
-                .flatMap(_ignored -> {
+                .flatMap(exisingScope -> {
                     final Credentials credentials = new Credentials();
                     credentials.setClientId(request.getClientId());
                     credentials.setNewEntry(true);
@@ -73,6 +73,7 @@ public class AdminService {
                     credentials.setClientSecret(Utilities.generateRandomSecure(17));
                     credentials.setStatus(request.isActivate() ? CredStatus.ACTIVE : CredStatus.INACTIVE);
                     credentials.setContextData(request.getContextData());
+                    credentials.setScopeId(exisingScope.getId());
                     return credentialsRepository.save(credentials)
                             .map(savedCred -> (CredentialsResponse) CredentialsResponse
                                     .builder()
