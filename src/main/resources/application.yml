@@ -9,3 +9,7 @@ spring:
       enabled: true
   flyway:
     url: jdbc:mysql://localhost:3306/auth_db
+
+logging:
+  level:
+    org.springframework.data.r2dbc: DEBUG

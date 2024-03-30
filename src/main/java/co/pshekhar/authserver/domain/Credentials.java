@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Data
@@ -21,7 +20,7 @@ public class Credentials implements Persistable<String> {
 
     private LocalDateTime expiry;
 
-    private ZonedDateTime lastRotatedOn;
+    private LocalDateTime lastRotatedOn;
 
     String scopeId; // FK to Scope entity
 

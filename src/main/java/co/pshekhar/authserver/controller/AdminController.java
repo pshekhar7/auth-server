@@ -1,6 +1,9 @@
 package co.pshekhar.authserver.controller;
 
+import co.pshekhar.authserver.domain.enums.CredStatus;
+import co.pshekhar.authserver.model.request.CredentialOpsRequest;
 import co.pshekhar.authserver.model.request.CredentialRequest;
+import co.pshekhar.authserver.model.request.CredentialRotateRequest;
 import co.pshekhar.authserver.model.request.ScopeRequest;
 import co.pshekhar.authserver.model.response.CredentialsResponse;
 import co.pshekhar.authserver.model.response.ScopeResponse;
@@ -48,6 +51,42 @@ public class AdminController {
         return adminService.issueCredentials(request)
                 .map(response -> {
                     HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<CredentialsResponse>> activateCredentials(@Valid @RequestBody CredentialOpsRequest request) {
+        return adminService.updateCredentialStatus(request, CredStatus.ACTIVE)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/expire", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<CredentialsResponse>> expireCredentials(@Valid @RequestBody CredentialOpsRequest request) {
+        return adminService.updateCredentialStatus(request, CredStatus.EXPIRED)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/summary", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<CredentialsResponse>> credentialsSummary(@Valid @RequestBody CredentialOpsRequest request) {
+        return adminService.getCredentialsSummary(request)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/rotate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<CredentialsResponse>> rotateCredentials(@Valid @RequestBody CredentialRotateRequest request) {
+        return adminService.rotateCredentials(request)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
                     return ResponseEntity.status(httpStatus).body(response);
                 });
     }

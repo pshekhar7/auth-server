@@ -4,7 +4,9 @@ import co.pshekhar.authserver.domain.Credentials;
 import co.pshekhar.authserver.domain.Scope;
 import co.pshekhar.authserver.domain.enums.CredStatus;
 import co.pshekhar.authserver.domain.enums.ScopeType;
+import co.pshekhar.authserver.model.request.CredentialOpsRequest;
 import co.pshekhar.authserver.model.request.CredentialRequest;
+import co.pshekhar.authserver.model.request.CredentialRotateRequest;
 import co.pshekhar.authserver.model.request.ScopeRequest;
 import co.pshekhar.authserver.model.response.CredentialsResponse;
 import co.pshekhar.authserver.model.response.ScopeResponse;
@@ -57,9 +59,69 @@ public class AdminService {
     }
 
     public Mono<CredentialsResponse> issueCredentials(@NonNull CredentialRequest request) {
-        return credentialsRepository.findById(request.getClientId())
+        return credentialsRepository.findAnyById(request.getClientId())
                 .map(cred -> (CredentialsResponse) CredentialsResponse.builder().status(Status.FAILURE).reason("Record already exists with the supplied clientId").build())
                 .switchIfEmpty(checkAndSaveNewCredentials(request));
+    }
+
+    public Mono<CredentialsResponse> updateCredentialStatus(@NonNull CredentialOpsRequest request, CredStatus credStatus) {
+        return credentialsRepository.findById(request.getClientId())
+                .flatMap(cred -> {
+                    cred.setStatus(credStatus);
+                    return credentialsRepository.save(cred)
+                            .map(savedCred -> (CredentialsResponse) CredentialsResponse
+                                    .builder()
+                                    .status(Status.SUCCESS)
+                                    .data(CredentialData.builder()
+                                            .clientId(savedCred.getClientId())
+                                            .expiry(Utilities.formatDate(savedCred.getExpiry()))
+                                            .status(savedCred.getStatus().name())
+                                            .build()
+                                    )
+                                    .build());
+                })
+                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+    }
+
+    public Mono<CredentialsResponse> getCredentialsSummary(@NonNull CredentialOpsRequest request) {
+        return credentialsRepository.findById(request.getClientId())
+                .map(existingCred -> (CredentialsResponse) CredentialsResponse
+                        .builder()
+                        .status(Status.SUCCESS)
+                        .data(CredentialData.builder()
+                                .clientId(existingCred.getClientId())
+                                .expiry(Utilities.formatDate(existingCred.getExpiry()))
+                                .status(existingCred.getStatus().name())
+                                .build()
+                        )
+                        .build()
+                )
+                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+    }
+
+    public Mono<CredentialsResponse> rotateCredentials(@NonNull CredentialRotateRequest request) {
+        return credentialsRepository.findById(request.getClientId())
+                .flatMap(existingCred -> {
+                            existingCred.setExpiry(LocalDateTime.now(ZoneId.of(Constant.IND_ZONE)).plusDays(request.getRotateAfter()));
+                            existingCred.setStatus(request.isActivate() ? CredStatus.ACTIVE : CredStatus.INACTIVE);
+                            existingCred.setLastRotatedOn(LocalDateTime.now(ZoneId.of(Constant.IND_ZONE)));
+                            existingCred.setClientSecret(Utilities.generateRandomSecure(17));
+                            return credentialsRepository.save(existingCred)
+                                    .map(savedCred ->
+                                            (CredentialsResponse) CredentialsResponse
+                                                    .builder()
+                                                    .status(Status.SUCCESS)
+                                                    .data(CredentialData.builder()
+                                                            .clientId(savedCred.getClientId())
+                                                            .expiry(Utilities.formatDate(savedCred.getExpiry()))
+                                                            .status(savedCred.getStatus().name())
+                                                            .secret(savedCred.getClientSecret())
+                                                            .build()
+                                                    )
+                                                    .build());
+                        }
+                )
+                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
     }
 
     private Mono<CredentialsResponse> checkAndSaveNewCredentials(CredentialRequest request) {
