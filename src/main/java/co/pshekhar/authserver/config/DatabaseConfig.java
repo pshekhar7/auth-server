@@ -1,7 +1,9 @@
 package co.pshekhar.authserver.config;
 
 import co.pshekhar.authserver.repository.converter.ReadingConverterForMap;
+import co.pshekhar.authserver.repository.converter.ReadingConverterForSet;
 import co.pshekhar.authserver.repository.converter.WritingConverterForMap;
+import co.pshekhar.authserver.repository.converter.WritingConverterForSet;
 import io.r2dbc.spi.ConnectionFactory;
 import org.flywaydb.core.Flyway;
 import org.jetbrains.annotations.NotNull;
@@ -52,6 +54,8 @@ public class DatabaseConfig extends AbstractR2dbcConfiguration {
         List<Object> converters = new ArrayList<>();
         converters.add(new ReadingConverterForMap());
         converters.add(new WritingConverterForMap());
+        converters.add(new ReadingConverterForSet());
+        converters.add(new WritingConverterForSet());
         return new R2dbcCustomConversions(getStoreConversions(), converters);
     }
 }

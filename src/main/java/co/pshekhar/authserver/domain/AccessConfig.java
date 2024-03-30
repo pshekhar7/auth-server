@@ -5,7 +5,6 @@ import co.pshekhar.authserver.domain.enums.AccessMode;
 import co.pshekhar.authserver.util.Generator;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -13,12 +12,16 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 public class AccessConfig extends IdGenerator implements Persistable<String> {
+    public AccessConfig() {
+        this.status = AccessConfigStatus.ACTIVE;
+        this.isNewEntry = true;
+    }
+
     @Id
     @Setter(AccessLevel.NONE)
     private String id;
@@ -34,13 +37,13 @@ public class AccessConfig extends IdGenerator implements Persistable<String> {
     private AccessConfigStatus status;
 
     @CreatedDate
-    private ZonedDateTime createdOn;
+    private LocalDateTime createdOn;
 
     @LastModifiedDate
-    private ZonedDateTime lastUpdatedOn;
+    private LocalDateTime lastUpdatedOn;
 
     @Transient
-    private boolean isNewEntry = false;
+    private boolean isNewEntry;
 
     @Override
     public boolean isNew() {
@@ -49,6 +52,6 @@ public class AccessConfig extends IdGenerator implements Persistable<String> {
 
     @Override
     public void initIdentifier() {
-        this.id = Generator.getRandomString("scp_", null, 13);
+        this.id = Generator.getRandomString("acsconf_", null, 13);
     }
 }

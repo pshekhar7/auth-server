@@ -16,7 +16,7 @@ public class CredentialRequest {
         this.rotateAfter = 180;
     }
 
-    @NotNull(message = "scope must not be null")
+    @NotNull(message = "clientId must not be null")
     private String clientId;
     @NotNull(message = "scope must not be null")
     private String scope;

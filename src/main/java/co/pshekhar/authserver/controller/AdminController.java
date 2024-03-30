@@ -1,11 +1,13 @@
 package co.pshekhar.authserver.controller;
 
 import co.pshekhar.authserver.domain.enums.CredStatus;
+import co.pshekhar.authserver.model.request.AccessConfigRequest;
 import co.pshekhar.authserver.model.request.CredentialOpsRequest;
 import co.pshekhar.authserver.model.request.CredentialRequest;
 import co.pshekhar.authserver.model.request.CredentialRotateRequest;
 import co.pshekhar.authserver.model.request.ScopeRequest;
 import co.pshekhar.authserver.model.response.CredentialsResponse;
+import co.pshekhar.authserver.model.response.GenericResponse;
 import co.pshekhar.authserver.model.response.ScopeResponse;
 import co.pshekhar.authserver.model.response.Status;
 import co.pshekhar.authserver.service.AdminService;
@@ -85,6 +87,24 @@ public class AdminController {
     @PostMapping(value = "/cred/rotate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     Mono<ResponseEntity<CredentialsResponse>> rotateCredentials(@Valid @RequestBody CredentialRotateRequest request) {
         return adminService.rotateCredentials(request)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/accessConfig", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<GenericResponse>> updateAccessConfig(@Valid @RequestBody AccessConfigRequest request) {
+        return adminService.updateAccessForCredential(request)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/cred/accessConfig/summary", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<GenericResponse>> accessConfigSummary(@Valid @RequestBody CredentialOpsRequest request) {
+        return adminService.accessConfigSummary(request)
                 .map(response -> {
                     HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
                     return ResponseEntity.status(httpStatus).body(response);

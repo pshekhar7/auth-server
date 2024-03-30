@@ -8,7 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 //@Data
 @Data
@@ -32,9 +32,9 @@ public class Logs {
     private LogOperation operation;
 
     @CreatedDate
-    private ZonedDateTime createdOn;
+    private LocalDateTime createdOn;
 
     @LastModifiedDate
-    private ZonedDateTime lastUpdatedOn;
+    private LocalDateTime lastUpdatedOn;
 
 }
