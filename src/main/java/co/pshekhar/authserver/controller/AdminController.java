@@ -2,6 +2,7 @@ package co.pshekhar.authserver.controller;
 
 import co.pshekhar.authserver.domain.enums.CredStatus;
 import co.pshekhar.authserver.model.request.AccessConfigRequest;
+import co.pshekhar.authserver.model.request.ApiTagRequest;
 import co.pshekhar.authserver.model.request.CredentialOpsRequest;
 import co.pshekhar.authserver.model.request.CredentialRequest;
 import co.pshekhar.authserver.model.request.CredentialRotateRequest;
@@ -107,6 +108,15 @@ public class AdminController {
         return adminService.accessConfigSummary(request)
                 .map(response -> {
                     HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+                    return ResponseEntity.status(httpStatus).body(response);
+                });
+    }
+
+    @PostMapping(value = "/config/apiTag", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    Mono<ResponseEntity<GenericResponse>> addApiTag(@Valid @RequestBody ApiTagRequest request) {
+        return adminService.addApiTag(request)
+                .map(response -> {
+                    HttpStatus httpStatus = response.getStatus() == Status.SUCCESS ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
                     return ResponseEntity.status(httpStatus).body(response);
                 });
     }

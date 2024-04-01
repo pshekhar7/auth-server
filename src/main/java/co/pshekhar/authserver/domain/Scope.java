@@ -40,6 +40,6 @@ public class Scope extends IdGenerator implements Persistable<String> {
 
     @Override
     public void initIdentifier() {
-        this.id = Generator.getRandomString("scp_", null, 13);
+        this.id = Generator.getRandomString(null,"scp_", 13);
     }
 }

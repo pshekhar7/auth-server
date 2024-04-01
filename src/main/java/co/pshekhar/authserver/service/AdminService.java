@@ -1,6 +1,7 @@
 package co.pshekhar.authserver.service;
 
 import co.pshekhar.authserver.domain.AccessConfig;
+import co.pshekhar.authserver.domain.ApiTagConfig;
 import co.pshekhar.authserver.domain.Credentials;
 import co.pshekhar.authserver.domain.Scope;
 import co.pshekhar.authserver.domain.enums.AccessConfigStatus;
@@ -8,6 +9,7 @@ import co.pshekhar.authserver.domain.enums.AccessMode;
 import co.pshekhar.authserver.domain.enums.CredStatus;
 import co.pshekhar.authserver.domain.enums.ScopeType;
 import co.pshekhar.authserver.model.request.AccessConfigRequest;
+import co.pshekhar.authserver.model.request.ApiTagRequest;
 import co.pshekhar.authserver.model.request.CredentialOpsRequest;
 import co.pshekhar.authserver.model.request.CredentialRequest;
 import co.pshekhar.authserver.model.request.CredentialRotateRequest;
@@ -22,6 +24,7 @@ import co.pshekhar.authserver.model.response.helper.AccessResponse;
 import co.pshekhar.authserver.model.response.helper.CredentialData;
 import co.pshekhar.authserver.model.response.helper.ScopeData;
 import co.pshekhar.authserver.repository.AccessConfigRepository;
+import co.pshekhar.authserver.repository.ApiTagConfigRepository;
 import co.pshekhar.authserver.repository.CredentialsRepository;
 import co.pshekhar.authserver.repository.ScopeRepository;
 import co.pshekhar.authserver.util.Constant;
@@ -42,11 +45,13 @@ public class AdminService {
     private final ScopeRepository scopeRepository;
     private final CredentialsRepository credentialsRepository;
     private final AccessConfigRepository accessConfigRepository;
+    private final ApiTagConfigRepository apiTagConfigRepository;
 
-    public AdminService(ScopeRepository scopeRepository, CredentialsRepository credentialsRepository, AccessConfigRepository accessConfigRepository) {
+    public AdminService(ScopeRepository scopeRepository, CredentialsRepository credentialsRepository, AccessConfigRepository accessConfigRepository, ApiTagConfigRepository apiTagConfigRepository) {
         this.scopeRepository = scopeRepository;
         this.credentialsRepository = credentialsRepository;
         this.accessConfigRepository = accessConfigRepository;
+        this.apiTagConfigRepository = apiTagConfigRepository;
     }
 
     public Mono<ScopeResponse> createScope(@NonNull ScopeRequest request) {
@@ -70,7 +75,7 @@ public class AdminService {
                                 .createdOn(Utilities.formatDate(existScope.getCreatedOn()))
                                 .build())
                         .build())
-                .switchIfEmpty(Mono.just(ScopeResponse.builder().status(Status.FAILURE).reason("Not found").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(ScopeResponse.builder().status(Status.FAILURE).reason("Not found").build())));
     }
 
     public Mono<CredentialsResponse> issueCredentials(@NonNull CredentialRequest request) {
@@ -96,7 +101,7 @@ public class AdminService {
                                     )
                                     .build());
                 })
-                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build())));
     }
 
     public Mono<CredentialsResponse> getCredentialsSummary(@NonNull CredentialOpsRequest request) {
@@ -112,7 +117,7 @@ public class AdminService {
                         )
                         .build()
                 )
-                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build())));
     }
 
     public Mono<CredentialsResponse> rotateCredentials(@NonNull CredentialRotateRequest request) {
@@ -137,7 +142,7 @@ public class AdminService {
                                                     .build());
                         }
                 )
-                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(CredentialsResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build())));
     }
 
     public Mono<GenericResponse> updateAccessForCredential(@NonNull AccessConfigRequest request) {
@@ -161,7 +166,7 @@ public class AdminService {
                                 .switchIfEmpty(createAccessConfig(request))
                                 .onErrorReturn(GenericResponse.builder().status(Status.FAILURE).reason("Internal error").build())
                 )
-                .switchIfEmpty(Mono.<GenericResponse>just(GenericResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(GenericResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build())));
     }
 
     public Mono<AccessConfigResponse> accessConfigSummary(@NonNull CredentialOpsRequest request) {
@@ -189,7 +194,28 @@ public class AdminService {
                                 )
                                 .log()
                 )
-                .switchIfEmpty(Mono.<AccessConfigResponse>just(AccessConfigResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(AccessConfigResponse.builder().status(Status.FAILURE).reason("No credentials found with supplied clientId").build())));
+    }
+
+    public Mono<GenericResponse> addApiTag(ApiTagRequest request) {
+        return apiTagConfigRepository.findByServiceScopeIdAndTag(request.getServiceScopeId(), request.getTag())
+                .map(_ignored -> (GenericResponse) GenericResponse.builder().status(Status.FAILURE).reason("apiTagConfig already exists with supplied details").build())
+                .switchIfEmpty(Mono.defer(() -> createApiTagConfig(request)));
+    }
+
+    private Mono<GenericResponse> createApiTagConfig(ApiTagRequest request) {
+        final ApiTagConfig apiTagConfig = new ApiTagConfig();
+        apiTagConfig.setNewEntry(true);
+        apiTagConfig.initIdentifier();
+        apiTagConfig.setTag(request.getTag());
+        apiTagConfig.setMethod(request.getMethod());
+        apiTagConfig.setServiceScopeId(request.getServiceScopeId());
+        apiTagConfig.setPathRegex(request.getPath());
+
+        return apiTagConfigRepository.save(apiTagConfig)
+                .doOnError(throwable ->
+                        log.error("Error occurred while saving apiTagConfig for tag: [{}] and serviceScopeId: [{}]. Reason: [{}]", request.getTag(), request.getServiceScopeId(), throwable.getMessage()))
+                .map(_ignored -> GenericResponse.builder().status(Status.SUCCESS).build());
     }
 
     private Mono<GenericResponse> createAccessConfig(AccessConfigRequest request) {
@@ -201,9 +227,10 @@ public class AdminService {
         accessConfig.setAccessApiList(request.getAccess().getApiTags());
 
         return accessConfigRepository.save(accessConfig)
-                .map(savedAccCnf -> (GenericResponse) GenericResponse.builder().status(Status.SUCCESS).build())
                 .doOnError(throwable ->
-                        log.error("Error occurred while saving access config for clientId: [{}] and targetScope: [{}]. Reason: [{}]", request.getClientId(), request.getTargetScopeId(), throwable.getMessage()));
+                        log.error("Error occurred while saving access config for clientId: [{}] and targetScope: [{}]. Reason: [{}]", request.getClientId(), request.getTargetScopeId(), throwable.getMessage()))
+                .map(savedAccCnf -> GenericResponse.builder().status(Status.SUCCESS).build());
+
     }
 
 
@@ -234,7 +261,7 @@ public class AdminService {
                             )
                             ;
                 })
-                .switchIfEmpty(Mono.<CredentialsResponse>just(CredentialsResponse.builder().status(Status.FAILURE).reason("No scope exists with supplied scope and scopeId. Please register a scope first.").build()));
+                .switchIfEmpty(Mono.defer(() -> Mono.just(CredentialsResponse.builder().status(Status.FAILURE).reason("No scope exists with supplied scope and scopeId. Please register a scope first.").build())));
     }
 
     private Mono<ScopeResponse> saveNewScope(ScopeRequest request) {

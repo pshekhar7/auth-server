@@ -13,3 +13,9 @@ spring:
 logging:
   level:
     org.springframework.data.r2dbc: DEBUG
+
+auth:
+  config:
+    jwt:
+      expiry-in-min: 3
+      signing-key: QPa1T?LZ;d=Ecpw?DTGa;exY$!*V!14) # dev signing key

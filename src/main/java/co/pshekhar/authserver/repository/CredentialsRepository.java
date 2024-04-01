@@ -13,6 +13,10 @@ public interface CredentialsRepository extends R2dbcRepository<Credentials, Stri
     @NotNull
     Mono<Credentials> findById(@NotNull String id);
 
+    @Query(value = "select * from credentials where client_id = :id and client_secret = :secret and status != 'EXPIRED'")
+    @NotNull
+    Mono<Credentials> findByIdAndSecret(@NotNull String id, String secret);
+
     @Query(value = "select * from credentials where client_id = :id")
     @NotNull
     Mono<Credentials> findAnyById(@NotNull String id);
