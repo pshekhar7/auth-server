@@ -14,4 +14,5 @@ public final class Constant {
     public static final String HEADER_TRACE_ID = "x-trace-id";
     public static final String HEADER_API_TAG = "x-api-tag";
     public static final String HEADER_AUTH_TOKEN_RESPONSE = "x-auth-token";
+    public static final String HEADER_LATENCY_RESPONSE = "x-latency-millis";
 }

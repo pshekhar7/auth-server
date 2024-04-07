@@ -34,6 +34,8 @@ public class Logs {
 
     private String correlationId; // for login related logging
 
+    private String traceId;
+
     private LogOperation operation;
 
     private String failureReason;

@@ -31,8 +31,9 @@ public class LogService {
         this.scheduler = scheduler;
     }
 
-    public void logScope(ScopeRequest request, ScopeResponse response) {
+    public void logScope(ScopeRequest request, ScopeResponse response, String traceId) {
         Logs logs = new Logs();
+        logs.setTraceId(traceId);
         logs.setOperation(LogOperation.SCOPE_CREATION);
         logs.setSuccess(response.getStatus() == Status.SUCCESS);
         logs.setFailureReason(response.getReason());
@@ -45,8 +46,9 @@ public class LogService {
                 .subscribe();
     }
 
-    public void logCredentials(String clientId, CredentialsResponse response, LogOperation operation) {
+    public void logCredentials(String clientId, CredentialsResponse response, LogOperation operation, String traceId) {
         Logs logs = new Logs();
+        logs.setTraceId(traceId);
         logs.setOperation(operation);
         logs.setSuccess(response.getStatus() == Status.SUCCESS);
         logs.setFailureReason(response.getReason());
@@ -57,8 +59,9 @@ public class LogService {
                 .subscribe();
     }
 
-    public void logAccessConfig(AccessConfigRequest request, GenericResponse response) {
+    public void logAccessConfig(AccessConfigRequest request, GenericResponse response, String traceId) {
         Logs logs = new Logs();
+        logs.setTraceId(traceId);
         logs.setOperation(LogOperation.ACCESS_UPDATE);
         logs.setSuccess(response.getStatus() == Status.SUCCESS);
         logs.setFailureReason(response.getReason());
@@ -70,7 +73,7 @@ public class LogService {
                 .subscribe();
     }
 
-    public void logLoginAttempt(HttpHeaders reqHeaders, InternalAuthResponse response) {
+    public void logLoginAttempt(HttpHeaders reqHeaders, InternalAuthResponse response, String traceId, String correlationId) {
         Map<String, String> loginData = new HashMap<>();
         loginData.put(Constant.HEADER_TARGET_PATH, reqHeaders.getFirst(Constant.HEADER_TARGET_PATH));
         loginData.put(Constant.HEADER_TARGET_HTTP_METHOD, reqHeaders.getFirst(Constant.HEADER_TARGET_HTTP_METHOD));
@@ -78,6 +81,8 @@ public class LogService {
         loginData.put(Constant.HEADER_DEVICE_ID, reqHeaders.getFirst(Constant.HEADER_DEVICE_ID));
 
         Logs logs = new Logs();
+        logs.setTraceId(traceId);
+        logs.setCorrelationId(correlationId);
         logs.setOperation(LogOperation.LOGIN);
         logs.setSuccess(response.getStatus() == Status.SUCCESS);
         logs.setFailureReason(response.getReason());

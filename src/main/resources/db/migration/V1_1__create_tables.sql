@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS logs
     access_config_id VARCHAR(255),
     tenant           VARCHAR(255),
     correlation_id   VARCHAR(255),
+    trace_id         VARCHAR(255),
     operation        VARCHAR(255),
     scope            VARCHAR(255),
     scope_id         VARCHAR(255),
