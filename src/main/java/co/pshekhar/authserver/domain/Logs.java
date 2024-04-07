@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 //@Data
 @Data
@@ -17,19 +18,27 @@ public class Logs {
     @Setter(AccessLevel.NONE)
     private Long id;
 
-    private String credId; // FK to Credentials entity; source
+    private String credId; // FK to Credentials entity; source; for login/credential related logging
 
-    private String targetScope; // FK to Scope entity; target service
+    private String targetScope; // FK to Scope entity; target service; for login related logging
 
     private Boolean success;
 
-    private String accessConfigId;
+    private String accessConfigId; // for accessConfig related logging
 
-    private String tenant;
+    private String scopeId; // for scope related logging
 
-    private String correlationId;
+    private String scope; // for scope related logging
+
+    private String tenant; // for login related logging
+
+    private String correlationId; // for login related logging
 
     private LogOperation operation;
+
+    private String failureReason;
+
+    private Map<String, String> loginData;
 
     @CreatedDate
     private LocalDateTime createdOn;

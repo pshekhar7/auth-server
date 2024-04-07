@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
@@ -38,7 +39,8 @@ public class AuthService {
                        AccessConfigRepository accessConfigRepository,
                        ApiTagConfigRepository apiTagConfigRepository,
                        @Value("${auth.config.jwt.expiry-in-min}") long expirationTimeMinutes,
-                       @Qualifier("jwt-secret-key") SecretKey secretKey) {
+                       @Qualifier("jwt-secret-key") SecretKey secretKey,
+                       @Qualifier("virtualThreadScheduler") Scheduler scheduler) {
         this.credentialsRepository = credentialsRepository;
         this.scopeRepository = scopeRepository;
         this.accessConfigRepository = accessConfigRepository;

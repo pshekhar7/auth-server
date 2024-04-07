@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS logs
     tenant           VARCHAR(255),
     correlation_id   VARCHAR(255),
     operation        VARCHAR(255),
+    scope            VARCHAR(255),
+    scope_id         VARCHAR(255),
+    failure_reason   VARCHAR(255),
+    login_data       JSON,
     created_on       DATETIME,
     last_updated_on  DATETIME,
     PRIMARY KEY (id)

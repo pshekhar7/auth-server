@@ -16,7 +16,7 @@ public class Credentials implements Persistable<String> {
     @Id
     private String clientId;
 
-    private String ClientSecret;
+    private String clientSecret;
 
     private LocalDateTime expiry;
 

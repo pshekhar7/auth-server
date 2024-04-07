@@ -32,8 +32,10 @@ import co.pshekhar.authserver.util.Utilities;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -47,7 +49,7 @@ public class AdminService {
     private final AccessConfigRepository accessConfigRepository;
     private final ApiTagConfigRepository apiTagConfigRepository;
 
-    public AdminService(ScopeRepository scopeRepository, CredentialsRepository credentialsRepository, AccessConfigRepository accessConfigRepository, ApiTagConfigRepository apiTagConfigRepository) {
+    public AdminService(ScopeRepository scopeRepository, CredentialsRepository credentialsRepository, AccessConfigRepository accessConfigRepository, ApiTagConfigRepository apiTagConfigRepository, @Qualifier("virtualThreadScheduler") Scheduler scheduler) {
         this.scopeRepository = scopeRepository;
         this.credentialsRepository = credentialsRepository;
         this.accessConfigRepository = accessConfigRepository;
